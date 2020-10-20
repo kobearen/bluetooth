@@ -40,9 +40,9 @@ class MainActivity : AppCompatActivity() {
         RecvEditText = findViewById<View>(R.id.text1) as EditText
         InitializeBleSetting()
 
-//        button.setOnClickListener {
-//            mBluetoothAdapter!!.bluetoothLeScanner.startScan(mScanCallback)
-//        }
+        button.setOnClickListener {
+            mBluetoothAdapter!!.bluetoothLeScanner.startScan(mScanCallback)
+        }
     }
 
     /**
