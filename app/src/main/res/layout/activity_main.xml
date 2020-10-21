@@ -32,7 +32,7 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="接続Button"
         tools:layout_editor_absoluteX="308dp"
         tools:layout_editor_absoluteY="14dp"
         tools:ignore="MissingConstraints" />
