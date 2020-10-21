@@ -1,13 +1,17 @@
 package com.example.bluetoothsample
 
 import BluetoothConnect
+import android.Manifest
 import android.bluetooth.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -29,6 +33,10 @@ val receiver = object : BroadcastReceiver() {
                 val deviceName = device.name
                 val deviceHardwareAddress = device.address // MAC address
 
+                Log.d("Debug", "Found ${device.type} ${device.name} ${device.address}")
+
+                // 目的のデバイスが見つかった場合にそのデバイスを操作する処理
+                //
             }
         }
     }
@@ -49,55 +57,75 @@ class MainActivity : AppCompatActivity() {
         // commit()で反映を行う
         fragmentTransaction.commit()
 
+        // Register for broadcasts when a device is discovered.
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        registerReceiver(receiver, filter)
 
+        val context = this
 
         button.setOnClickListener{
-            var bluetoothHeadset: BluetoothHeadset? = null
 
-// Get the default adapter
+            // 実行時に権限をチェック。
+            if (ContextCompat.checkSelfPermission(button.context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("Debug", "実行時の権限チェック：許可なし")
+
+                // ユーザーに権限を要求するダイアログを表示済みかどうかチェック。
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    Log.d("Debug", "明示的に不許可済")
+                    // PEND: 本来はここでユーザーに権限が必要な理由を説明する画面を表示する。
+                    requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 0 )
+                } else {
+                    Log.d("Debug", "まだ許可も不許可もしていない")
+                    // 明示的に許可も不許可もされていなければ、ユーザーに許可を求める。
+                    requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 0 )
+                }
+                // 処理を中断。明示的に許可した後再度ボタンを押してもらう。
+                return@setOnClickListener
+            }
+
+            Log.d("Debug", "明示的に許可済")  // 下の処理を続行。
+
+            // Get the default adapter
             val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
             // BluetoothAdapter を取得
             if (bluetoothAdapter == null) {
                 // Device doesn't support Bluetooth
+                return@setOnClickListener
             }
+
             // Bluetooth を有効にする
-            if (bluetoothAdapter?.isEnabled == false) {
+            if (bluetoothAdapter.isEnabled == false) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, 0)
             }
 
-            val profileListener = object : BluetoothProfile.ServiceListener {
+            // Bluetoothデバイスのスキャンを開始する。 *** これがないとBroadcastReceiverのonReceiveは呼ばれません。
+            bluetoothAdapter.startDiscovery()
 
+            //***************************************** ↓↓↓ 以下はおそらく39行目以下に書いたほうが良いかも（?）
+            var bluetoothHeadset: BluetoothHeadset? = null
+            val profileListener = object : BluetoothProfile.ServiceListener {
                 override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                     if (profile == BluetoothProfile.HEADSET) {
                         bluetoothHeadset = proxy as BluetoothHeadset
+
+                        // ... call functions on bluetoothHeadset
+
+                        // Close proxy connection after use.
+                        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
                     }
                 }
-
                 override fun onServiceDisconnected(profile: Int) {
                     if (profile == BluetoothProfile.HEADSET) {
                         bluetoothHeadset = null
                     }
                 }
             }
+            // プロキシへの接続を確立
+            bluetoothAdapter.getProfileProxy(context, profileListener, BluetoothProfile.HEADSET)
+            //***************************************** ↑↑↑
 
-// プロキシへの接続を確立
-            bluetoothAdapter?.getProfileProxy(this, profileListener, BluetoothProfile.HEADSET)
-
-// ... call functions on bluetoothHeadset
-
-
-
-
-            // Register for broadcasts when a device is discovered.
-            val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-            registerReceiver(receiver, filter)
-
-            // Close proxy connection after use.
-            bluetoothAdapter?.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
         }
-
-
 
         fun onDestroy() {
             super.onDestroy()
