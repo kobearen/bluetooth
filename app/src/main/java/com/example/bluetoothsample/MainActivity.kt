@@ -2,37 +2,21 @@ package com.example.bluetoothsample
 
 import BluetoothConnect
 import android.bluetooth.*
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
-//BLE
-private var mBluetoothAdapter: BluetoothAdapter? = null
-private val mBleGatt: BluetoothGatt? = null
-private val mBluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
-
-//ACTION_FOUNDのBroadcastReceiverを作成
-val receiver = object : BroadcastReceiver() {
-
-    override fun onReceive(context: Context, intent: Intent) {
-        val action: String? = intent.action
-        when(action) {
-            BluetoothDevice.ACTION_FOUND -> {
-                // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
-                val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                val deviceName = device.name
-                val deviceHardwareAddress = device.address // MAC address
-
-            }
-        }
-    }
-}
+var mBluetoothLeScanner: BluetoothLeScanner? = null
+var mScanCallback: ScanCallback? = null
+var bluetoothGatt: BluetoothGatt? = null
+var state : Int? = null
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,60 +33,95 @@ class MainActivity : AppCompatActivity() {
         // commit()で反映を行う
         fragmentTransaction.commit()
 
-
-
         button.setOnClickListener{
-            var bluetoothHeadset: BluetoothHeadset? = null
-
-// Get the default adapter
             val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-            // BluetoothAdapter を取得
+
+            // Bluetoothサポートしているかのチェック
             if (bluetoothAdapter == null) {
-                // Device doesn't support Bluetooth
-            }
-            // Bluetooth を有効にする
-            if (bluetoothAdapter?.isEnabled == false) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, 0)
+                Toast.makeText(this, "Bluetooth未サポート", Toast.LENGTH_SHORT)
+                finish()
             }
 
-            val profileListener = object : BluetoothProfile.ServiceListener {
+            mBluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
+            // kotlin プロパティ優先なのでメソッド使うな
 
-                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                    if (profile == BluetoothProfile.HEADSET) {
-                        bluetoothHeadset = proxy as BluetoothHeadset
-                    }
+            mScanCallback = initCallbacks()
+            println(mScanCallback.toString())
+            println("mScanCallback")
+
+            // スキャンの開始
+            mBluetoothLeScanner?.startScan(mScanCallback)
+
+            // スキャンの停止
+            // mBluetoothLeScanner?.stopScan(mScanCallback)
+
+        }
+    }
+
+    private fun initCallbacks(): ScanCallback? {
+        return object : ScanCallback() {
+            override fun onScanResult(
+                callbackType: Int,
+                result: ScanResult
+            ) {
+                super.onScanResult(callbackType, result)
+
+                // デバイスが見つかった！
+                if (result != null && result.device != null) {
+                    // リストに追加などなどの処理をおこなう
+                    //addDevice(result.getDevice(), result.getRssi())
+                    connect(result.device)
+
                 }
+                return
+            }
+        }
+    }
+    fun connect(device: BluetoothDevice) {
+        device.connectGatt(this, false, gattCallback)
 
-                override fun onServiceDisconnected(profile: Int) {
-                    if (profile == BluetoothProfile.HEADSET) {
-                        bluetoothHeadset = null
-                    }
+    }
+    private val gattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            if (newState == BluetoothGatt.STATE_CONNECTED) {
+                // ペリフェラルとの接続に成功した時点でサービスを検索する
+                gatt.discoverServices()
+            } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                // ペリフェラルとの接続が切れた時点でオブジェクトを空にする
+                if (bluetoothGatt != null) {
+                    bluetoothGatt!!.close()
+                    bluetoothGatt = null
+//                }
+//                state = DISCONNECTED
                 }
             }
-
-// プロキシへの接続を確立
-            bluetoothAdapter?.getProfileProxy(this, profileListener, BluetoothProfile.HEADSET)
-
-// ... call functions on bluetoothHeadset
-
-
-
-
-            // Register for broadcasts when a device is discovered.
-            val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-            registerReceiver(receiver, filter)
-
-            // Close proxy connection after use.
-            bluetoothAdapter?.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
         }
 
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                bluetoothGatt = gatt
+                state = CONNECTED
+            }
+        }
+        fun registerNotification() {
+            // notificationが有効なBluetoothGattCharacteristicを取得する
+            val BluetoothGattCharacteristic: characteristic = findCharacteristic(serviceUUID, characteristicUUID, BluetoothGattCharacteristic.PROPERTY_NOTIFY)
 
+            // ペリフェラルのnotificationを有効化する。下のUUIDはCharacteristic Configuration Descriptor UUIDというもの
+            val BluetoothGattDescriptor: descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
 
-        fun onDestroy() {
-            super.onDestroy()
-            // Don't forget to unregister the ACTION_FOUND receiver.
-            unregisterReceiver(receiver)
+            // Androidフレームワークに対してnotification通知登録を行う, falseだと解除する
+            bluetoothGatt?.setCharacteristicNotification(characteristic, true)
+
+            // characteristic のnotification 有効化する
+            descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            bluetoothGatt?.writeDescriptor(descriptor)
+        }
+
+        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic ) {
+            if (NOTIFICATION_CHARACTERISTIC_UUID.equals(characteristic.uuid.toString())) {
+                val notification_data = characteristic.value
+            }
         }
     }
 }
