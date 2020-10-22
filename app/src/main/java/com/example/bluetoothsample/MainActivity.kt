@@ -9,7 +9,9 @@ import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
@@ -41,6 +43,11 @@ class MainActivity : AppCompatActivity() {
 
         val webView: WebView = findViewById(R.id.webView)
         webView.loadUrl("https://tanukigolf.com/") //https://www.google.co.jp/
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                return false
+            }
+        }
 
         button.setOnClickListener{
             val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
@@ -56,9 +63,6 @@ class MainActivity : AppCompatActivity() {
             mScanCallback = initCallbacks()
             // スキャンの開始
             mBluetoothLeScanner?.startScan(mScanCallback)
-
-            // スキャンの停止
-            // mBluetoothLeScanner?.stopScan(mScanCallback)
 
         }
     }
@@ -77,6 +81,9 @@ class MainActivity : AppCompatActivity() {
                     connect(result.device)
 
                 }
+
+                // スキャンの停止
+                mBluetoothLeScanner?.stopScan(mScanCallback)
                 return
             }
         }
