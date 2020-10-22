@@ -19,7 +19,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 private var mBluetoothAdapter: BluetoothAdapter? = null
 private val mBleGatt: BluetoothGatt? = null
 private val mBluetoothGattCharacteristic: BluetoothGattCharacteristic? = null
-
+// Get the default adapter
+val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 //ACTION_FOUNDのBroadcastReceiverを作成
 val receiver = object : BroadcastReceiver() {
 
@@ -28,15 +29,35 @@ val receiver = object : BroadcastReceiver() {
         when(action) {
             BluetoothDevice.ACTION_FOUND -> {
                 // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
                 val device: BluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                val deviceType = device.type
                 val deviceName = device.name
                 val deviceHardwareAddress = device.address // MAC address
 
                 Log.d("Debug", "Found ${device.type} ${device.name} ${device.address}")
 
                 // 目的のデバイスが見つかった場合にそのデバイスを操作する処理
-                //
+
+                var bluetoothHeadset: BluetoothHeadset? = null
+                val profileListener = object : BluetoothProfile.ServiceListener {
+                    override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                        if (profile == BluetoothProfile.HEADSET) {
+                            bluetoothHeadset = proxy as BluetoothHeadset
+
+                            // ... call functions on bluetoothHeadset
+
+                            // Close proxy connection after use.
+                            bluetoothAdapter?.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
+                        }
+                    }
+                    override fun onServiceDisconnected(profile: Int) {
+                        if (profile == BluetoothProfile.HEADSET) {
+                            bluetoothHeadset = null
+                        }
+                    }
+                }
+                // プロキシへの接続を確立
+                bluetoothAdapter?.getProfileProxy(context, profileListener, BluetoothProfile.HEADSET)
             }
         }
     }
@@ -85,8 +106,7 @@ class MainActivity : AppCompatActivity() {
 
             Log.d("Debug", "明示的に許可済")  // 下の処理を続行。
 
-            // Get the default adapter
-            val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+
             // BluetoothAdapter を取得
             if (bluetoothAdapter == null) {
                 // Device doesn't support Bluetooth
@@ -102,28 +122,7 @@ class MainActivity : AppCompatActivity() {
             // Bluetoothデバイスのスキャンを開始する。 *** これがないとBroadcastReceiverのonReceiveは呼ばれません。
             bluetoothAdapter.startDiscovery()
 
-            //***************************************** ↓↓↓ 以下はおそらく39行目以下に書いたほうが良いかも（?）
-            var bluetoothHeadset: BluetoothHeadset? = null
-            val profileListener = object : BluetoothProfile.ServiceListener {
-                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                    if (profile == BluetoothProfile.HEADSET) {
-                        bluetoothHeadset = proxy as BluetoothHeadset
 
-                        // ... call functions on bluetoothHeadset
-
-                        // Close proxy connection after use.
-                        bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bluetoothHeadset)
-                    }
-                }
-                override fun onServiceDisconnected(profile: Int) {
-                    if (profile == BluetoothProfile.HEADSET) {
-                        bluetoothHeadset = null
-                    }
-                }
-            }
-            // プロキシへの接続を確立
-            bluetoothAdapter.getProfileProxy(context, profileListener, BluetoothProfile.HEADSET)
-            //***************************************** ↑↑↑
 
         }
 
