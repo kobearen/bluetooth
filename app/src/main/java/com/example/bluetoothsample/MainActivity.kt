@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         // commit()で反映を行う
         fragmentTransaction.commit()
 
+        val webView: WebView = findViewById(R.id.webView)
+        webView.loadUrl("https://tanukigolf.com/") //https://www.google.co.jp/
+
         button.setOnClickListener{
             val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 

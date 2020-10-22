@@ -36,4 +36,16 @@
         tools:layout_editor_absoluteX="308dp"
         tools:layout_editor_absoluteY="14dp"
         tools:ignore="MissingConstraints" />
+
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="416dp"
+        android:layout_height="300dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
