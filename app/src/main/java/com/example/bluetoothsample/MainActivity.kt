@@ -79,22 +79,26 @@ class MainActivity : AppCompatActivity() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 super.onScanResult(callbackType, result)
 
-                // デバイスが見つかった！
+                // デバイスが見つかる
                 if (result?.device != null) {
-                    // リストに追加などなどの処理をおこなう
-                    //addDevice(result.getDevice(), result.getRssi())
                     addPeripheral(Peripheral(result))
                     println("リスト〜listOf(result)${(listOf(result))}")
+
                     connect(result.device)
 
                 }
 
-                // スキャンの停止
-                mBluetoothLeScanner?.stopScan(mScanCallback)
+
                 return
             }
         }
     }
+    override fun onStop() {
+        super.onStop()
+        // スキャンの停止
+        mBluetoothLeScanner?.stopScan(mScanCallback)
+    }
+
     fun addPeripheral(peripheral: Peripheral) = addPeripherals(listOf(peripheral))
 
     fun addPeripherals(peripheralList: List<Peripheral>) {
