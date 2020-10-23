@@ -16,8 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-
+import android.util.Log
 
 var mBluetoothLeScanner: BluetoothLeScanner? = null
 var mScanCallback: ScanCallback? = null
@@ -42,7 +41,14 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
 
         val webView: WebView = findViewById(R.id.webView)
-        webView.loadUrl("https://tanukigolf.com/") //https://www.google.co.jp/
+        //https://www.google.co.jp/　//https://tanukigolf.com/
+        webView.apply {
+            loadUrl(
+                "http://192.168.128.200:8080/#/login"
+            )
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+        }
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 return false
@@ -63,6 +69,7 @@ class MainActivity : AppCompatActivity() {
             mScanCallback = initCallbacks()
             // スキャンの開始
             mBluetoothLeScanner?.startScan(mScanCallback)
+            Log.d("TAG", "serviceとcharacteristicのリスト")
 
         }
     }
