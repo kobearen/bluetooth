@@ -36,6 +36,15 @@
         tools:layout_editor_absoluteX="308dp"
         tools:layout_editor_absoluteY="14dp"
         tools:ignore="MissingConstraints" />
+    <Button
+        android:id="@+id/button_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ログインButton"
+        app:layout_constraintStart_toStartOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/button"
+
+        tools:ignore="MissingConstraints" />
 
 
     <WebView

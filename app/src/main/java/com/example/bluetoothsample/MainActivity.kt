@@ -5,6 +5,7 @@ import android.bluetooth.*
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.Intent
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.os.Bundle
 import android.os.Parcel
@@ -24,6 +25,8 @@ var mScanCallback: ScanCallback? = null
 var bluetoothGatt: BluetoothGatt? = null
 var state : Int? = null
 val peripherals = MutableLiveData<MutableList<Peripheral>>()
+const val DEVICE_NAME = "com.example.bluetoothkotlindemo.DEVICE_NAME"
+const val DEVICE_ADDRESS = "com.example.bluetoothkotlindemo.DEVICE_ADDRESS"
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,7 +66,9 @@ class MainActivity : AppCompatActivity() {
             mScanCallback = initCallbacks()
             // スキャンの開始
             mBluetoothLeScanner?.startScan(mScanCallback)
-
+        }
+        button_login.setOnClickListener {
+            startActivity(Intent(this, DeviceScanActivity::class.java))
         }
     }
 

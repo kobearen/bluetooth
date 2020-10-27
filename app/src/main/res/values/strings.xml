@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">BluetoothSample</string>
+    <string name="no_permission">権限を許可した後アプリケーションを再起動してください。</string>
+    <string name="has_permission">権限が許可済みです。</string>
+    <string name="bt_not_enabled">Bluetoothを有効化してください。</string>
+    <string name="bt_enabled">Bluetoothが有効になっています。</string>
+    <string name="ble_not_supported">この端末ではBluetooth Low Energyがサポートされていません。</string>
+    <string name="lbl_devices">ペアリング済みのデバイス</string>
+    <string name="devices_message">タップするとデバイス詳細画面を開きます。</string>
+    <string name="devices_message_none">ペアリングされたデバイスがありません。</string>
+
+    <string name="device_detail_title">BLEデバイス詳細情報</string>
+    <string name="btn_connect">接続</string>
+    <string name="btn_disconnect">切断</string>
+    <string name="btn_send">送信</string>
+    <string name="unknown_service">サービス</string>
+    <string name="unknown_characteristic">特性</string>
+    <string name="connected">接続済み</string>
+    <string name="disconnected">接続されていません</string>
+
+    <string name="device_scan_title">BLEデバイス検出</string>
+    <string name="btn_start_scan">検出開始</string>
+    <string name="btn_stop_scan">検出停止</string>
+    <string name="unknown_device">デバイス</string>
+
 </resources>
