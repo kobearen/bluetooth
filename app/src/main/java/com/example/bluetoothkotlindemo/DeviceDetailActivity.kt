@@ -1,4 +1,4 @@
-package com.example.bluetoothsample
+package com.example.bluetoothkotlindemo
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
@@ -9,12 +9,13 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ExpandableListView
 import android.widget.ExpandableListView.OnChildClickListener
 import android.widget.SimpleExpandableListAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.bluetoothsample.BluetoothLeService.LocalBinder
+import com.example.bluetoothkotlindemo.BluetoothLeService.LocalBinder
 
 
 class DeviceDetailActivity : AppCompatActivity() {
@@ -84,7 +85,7 @@ class DeviceDetailActivity : AppCompatActivity() {
         override fun onServiceConnected(componentName: ComponentName, service: IBinder) {
             Log.d("Debug", "mBluetoothLeService onServiceConnected.")
 
-            mBluetoothLeService = (service as BluetoothLeService.LocalBinder).service
+            mBluetoothLeService = (service as LocalBinder).service
             if (!(mBluetoothLeService?.initialize() ?: false)) {
                 Log.e("Debug", "Unable to initialize Bluetooth")
                 return

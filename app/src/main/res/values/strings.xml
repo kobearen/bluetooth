@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BluetoothSample</string>
+    <string name="app_name">Bluetooth Kotlin Demo</string>
     <string name="no_permission">権限を許可した後アプリケーションを再起動してください。</string>
     <string name="has_permission">権限が許可済みです。</string>
     <string name="bt_not_enabled">Bluetoothを有効化してください。</string>

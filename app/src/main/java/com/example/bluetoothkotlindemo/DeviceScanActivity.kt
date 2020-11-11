@@ -1,4 +1,4 @@
-package com.example.bluetoothsample
+package com.example.bluetoothkotlindemo
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.LeScanCallback
@@ -7,17 +7,12 @@ import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings.Global.DEVICE_NAME
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.bluetoothsample.DEVICE_ADDRESS
-import com.example.bluetoothsample.DeviceDetailActivity
-import com.example.bluetoothsample.R
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 private const val SCAN_PERIOD: Long = 30000 // 最長30秒で自動停止。
@@ -30,6 +25,7 @@ class DeviceScanActivity : AppCompatActivity() {
     private var mScanning: Boolean = false
     private lateinit var mBtnStartScan: Button
     private lateinit var mBtnStopScan: Button
+    private lateinit var mLstDevices: ListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +49,26 @@ class DeviceScanActivity : AppCompatActivity() {
         mLeDeviceListAdapter = LeDeviceListAdapter()
         lstDevices.adapter = mLeDeviceListAdapter
         lstDevices.setOnItemClickListener { l: AdapterView<*>?, v: View?, position: Int, id: Long -> onListItemClick(l, v, position, id) }
+
+        // ペアリング済みデバイスの一覧を表示。
+        mLstDevices = findViewById(R.id.lstDevices2)
+        val devices = mBluetoothAdapter.bondedDevices.toList()
+        val deviceNames: List<String> = devices.map { "${it.name} (${it.address})" }
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deviceNames)
+        mLstDevices.adapter = adapter
+
+        // ペアリング済みデバイス一覧の行がクリックされたときの処理。
+        mLstDevices.setOnItemClickListener { parent, view, position, id ->
+            val device = devices.get(position)
+            if (device != null) {
+                // デバイス詳細情報画面を開く。
+                val intent = Intent(this, DeviceDetailActivity::class.java).apply {
+                    putExtra(DEVICE_NAME, device.name)
+                    putExtra(DEVICE_ADDRESS, device.address)
+                }
+                startActivity(intent)
+            }
+        }
     }
 
     override fun onResume() {

@@ -1,8 +1,8 @@
-package com.example.bluetoothsample
+package com.example.bluetoothkotlindemo
 
 import java.util.*
 
-// 変数名・値は個別のユースケースに応じて変更する
+// TODO: 以下に書かれている変数名・値は個別のユースケースに応じて変更する必要があります。
 //
 object GattAttributes {
     private val attributes: HashMap<String?, String?> = HashMap<String?, String?>()

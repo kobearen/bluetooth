@@ -1,4 +1,4 @@
-package com.example.bluetoothsample
+package com.example.bluetoothkotlindemo
 
 import android.app.Service
 import android.bluetooth.*
