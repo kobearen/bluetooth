@@ -81,7 +81,6 @@ class DeviceConnectionActivity : AppCompatActivity() {
         btnOpenScanActivity.setOnClickListener {
             startActivity(Intent(this, DeviceScanActivity::class.java))
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -149,19 +148,19 @@ class DeviceConnectionActivity : AppCompatActivity() {
         return true
     }
 
-    fun getListPairedDevices() {
-        // ペアリング済みデバイスの一覧を表示
-        lateinit var mBluetoothAdapter: BluetoothAdapter
-        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = bluetoothManager.adapter
-        val devices = mBluetoothAdapter.bondedDevices.toList()
-        val deviceNames: List<String> = devices.map { "${it.name} (${it.address})" }
-
-        println(deviceNames)
-        println("deviceNames")
-
-
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deviceNames)
-        mLstDevices.adapter = adapter
-    }
+//    fun getListPairedDevices() {
+//        lateinit var mBluetoothAdapter: BluetoothAdapter
+//        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+//        mBluetoothAdapter = bluetoothManager.adapter
+//        // 接続済デバイスの一覧
+//        val devices = mBluetoothAdapter.bondedDevices.toList()
+//        val deviceNames: List<String> = devices.map { "${it.name} (${it.address})" }
+//
+//        println(deviceNames)
+//        println("deviceNames")
+//
+//
+//        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deviceNames)
+//        mLstDevices.adapter = adapter
+//    }
 }

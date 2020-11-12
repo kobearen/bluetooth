@@ -1,6 +1,7 @@
 package com.example.bluetoothkotlindemo
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebResourceRequest
@@ -51,11 +52,10 @@ class MainActivity : AppCompatActivity() {
                 if(url!!.contains("task")) {
                     // URLに"task"文字が含まれているとき
                     // bluetooth接続状態を確認→webに送る
-                    view?.loadUrl("https://tanukigolf.com/")//遷移
-
                     // ペアリング済みデバイスの一覧を表示
                     // DeviceConnectionActivity().getListPairedDevices()
-                    return true        // 内山先生に質問2 trueは誰に何を返している？
+                    getListPairedDevices()
+                    return false        // 内山先生に質問2 trueは誰に何を返している？
                 }
 
                 return super.shouldOverrideUrlLoading(view, url)
@@ -65,6 +65,22 @@ class MainActivity : AppCompatActivity() {
     }
     // 中身を空にする ⇒　戻るボタンが使えないようになる
     override fun onBackPressed() {
+    }
+
+    fun getListPairedDevices() {
+        lateinit var mBluetoothAdapter: BluetoothAdapter
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = bluetoothManager.adapter
+        // 接続済デバイスの一覧
+        val devices = mBluetoothAdapter.bondedDevices.toList()
+        val deviceNames: List<String> = devices.map { "${it.name} (${it.address})" }
+
+        println(deviceNames)
+        println("deviceNames")
+
+
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deviceNames)
+
     }
 }
 
