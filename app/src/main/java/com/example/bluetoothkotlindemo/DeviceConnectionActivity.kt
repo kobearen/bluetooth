@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 
 class DeviceConnectionActivity : AppCompatActivity() {
@@ -148,5 +147,21 @@ class DeviceConnectionActivity : AppCompatActivity() {
         }
 
         return true
+    }
+
+    fun getListPairedDevices() {
+        // ペアリング済みデバイスの一覧を表示
+        lateinit var mBluetoothAdapter: BluetoothAdapter
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = bluetoothManager.adapter
+        val devices = mBluetoothAdapter.bondedDevices.toList()
+        val deviceNames: List<String> = devices.map { "${it.name} (${it.address})" }
+
+        println(deviceNames)
+        println("deviceNames")
+
+
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deviceNames)
+        mLstDevices.adapter = adapter
     }
 }
