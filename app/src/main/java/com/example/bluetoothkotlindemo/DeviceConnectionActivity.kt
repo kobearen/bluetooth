@@ -4,6 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -26,6 +27,8 @@ class DeviceConnectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_connection)
 
+        // 縦画面固定
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         // BLEがサポートされているかチェック。
         if (!checkSupported()) finish()
@@ -90,6 +93,9 @@ class DeviceConnectionActivity : AppCompatActivity() {
         if (REQUEST_BT_ON == requestCode) {
             mTxtEnabled.setText(if (resultCode == AppCompatActivity.RESULT_OK) R.string.bt_enabled else R.string.bt_not_enabled)
         }
+    }
+    override fun onBackPressed() {
+        //中身を空にする ⇒　戻るボタンが使えないようになる
     }
 
     fun checkSupported(): Boolean {
